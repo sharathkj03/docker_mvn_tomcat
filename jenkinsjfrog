@@ -1,0 +1,22 @@
+pipeline {
+    agent {label 'slave1'} 
+    stages {
+        stage('My Build') { 
+            steps {
+             // sh "echo ${BUILD_NUMBER}"
+              sh 'mvn deploy'
+              sh 'pwd'
+            }
+        }
+        stage('My deploy') { 
+        agent {label 'slave2'}
+            steps {
+              sh 'curl -u sharathkj68@gmail.com:Karunadu@13 -O https://sharath03.jfrog.io/artifactory/libs-release-local/com/efsavage/hello-world-war/1.0.0/hello-world-war-1.0.0.war'
+              sh 'sudo cp -R hello-world-war-1.0.0.war /opt/tomcat/webapps/'
+              sh 'sudo sh /opt/tomcat/bin/shutdown.sh'
+              sh 'sleep 2'
+              sh 'sudo sh /opt/tomcat/bin/startup.sh'
+            }
+        }
+    }
+}

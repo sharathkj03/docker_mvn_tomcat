@@ -1,0 +1,23 @@
+pipeline {
+    agent {label 'slave1'}
+    stages {
+        stage ('My Build') { 
+            steps {
+              sh 'mvn package'
+              sh 'pwd'
+              sh 'whoami'
+              sh 'scp -R /home/virat/hello-world-war/target/hello-world-war-1.0.0.war yuvi@172.31.47.8:/opt/tomcat/webapps/'
+            }
+        }
+        stage ('My deploy') { 
+        agent {label 'slave2'}
+            steps {
+              sh 'pwd'
+              sh 'whoami'
+              sh 'sudo sh /opt/tomcat/bin/shutdown.sh'
+              sh 'sleep 3'
+              sh 'sudo sh /opt/tomcat/bin/startup.sh'
+            }
+        }
+    }       
+}
