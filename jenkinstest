@@ -1,23 +1,26 @@
 pipeline {
     agent {label 'slave1'}
     stages {
-        stage ('My Build') { 
+        stage('my Build') {
             steps {
-              sh 'mvn package'
-              sh 'pwd'
-              sh 'whoami'
-              sh 'scp -R /home/virat/hello-world-war/target/hello-world-war-1.0.0.war yuvi@172.31.47.8:/opt/tomcat/webapps/'
+                sh 'docker build -t tomcat_build:latest .'
             }
-        }
-        stage ('My deploy') { 
-        agent {label 'slave2'}
+        }  
+        stage('publish stage') {
             steps {
-              sh 'pwd'
-              sh 'whoami'
-              sh 'sudo sh /opt/tomcat/bin/shutdown.sh'
-              sh 'sleep 3'
-              sh 'sudo sh /opt/tomcat/bin/startup.sh'
+                sh "echo ${BUILD_NUMBER}"
+                sh 'docker login -u sharath03 -p Snoofy@13'
+                sh 'docker tag tomcat_build:latest sharath03/tomcat_maven:latest'
+                sh 'docker push sharath03/tomcat_maven:latest'
             }
-        }
-    }       
+        } 
+        stage( 'my deploy' ) {
+        agent {label 'slave2'} 
+            steps {
+               sh 'docker pull sharath03/tomcat_maven:latest'
+               sh 'docker rm -f mytomcat'
+               sh 'docker run -d -p 8080:8080 --name mytomcat sharath03/tomcat_maven:latest'
+            }
+        }    
+    } 
 }
