@@ -3,23 +3,23 @@ pipeline {
     stages {
         stage('my Build') {
             steps {
-                sh 'docker build -t tomcat_build:latest .'
+                sh 'docker build -t tomcat_build:${BUILD_NUMBER} .'
             }
         }  
         stage('publish stage') {
             steps {
                 sh "echo ${BUILD_NUMBER}"
                 sh 'docker login -u sharath03 -p Snoofy@13'
-                sh 'docker tag tomcat_build:latest sharath03/tomcat_maven:latest'
-                sh 'docker push sharath03/tomcat_maven:latest'
+                sh 'docker tag tomcat_build:latest sharath03/tomcat_maven:${BUILD_NUMBER}'
+                sh 'docker push sharath03/tomcat_maven:${BUILD_NUMBER}'
             }
         } 
         stage( 'my deploy' ) {
         agent {label 'slave2'} 
             steps {
-               sh 'docker pull sharath03/tomcat_maven:latest'
+               sh 'docker pull sharath03/tomcat_maven:${BUILD_NUMBER}'
                sh 'docker rm -f mytomcat'
-               sh 'docker run -d -p 8080:8080 --name mytomcat sharath03/tomcat_maven:latest'
+               sh 'docker run -d -p 8080:8080 --name mytomcat sharath03/tomcat_maven:${BUILD_NUMBER}'
             }
         }    
     } 
