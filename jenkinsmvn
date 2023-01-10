@@ -9,9 +9,12 @@ pipeline {
         stage('publish stage') {
             steps {
                 sh "echo ${BUILD_NUMBER}"
-                sh 'docker login -u sharath03 -p Snoofy@13'
-                sh 'docker tag tomcat_build:${BUILD_NUMBER} sharath03/tomcat_maven:${BUILD_NUMBER}'
-                sh 'docker push sharath03/tomcat_maven:${BUILD_NUMBER}'
+                sh "echo ${BUILD_VERSION}"
+                withCredentials([usernamePassword(credentialsId: 'Dockerhub', passwordVariable: 'DockerhubPassword', usernameVariable: 'DockerhubUser')]) {
+                sh "docker login -u ${env.DockerhubUser} -p ${env.DockerhubPassword}"
+                sh 'docker tag tomcat_build:${BUILD_VERSION} sharath03/tomcat_maven:${BUILD_VERSION}'
+                sh 'docker push sharath03/tomcat_maven:${BUILD_VERSION}'
+                }
             }
         } 
         stage( 'my deploy' ) {
